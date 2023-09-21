@@ -22,7 +22,7 @@ function M.BlameMe()
 
   local commit_info = line_information[line_number]
 
-  if type(commit_info) ~= 'string' then
+  if type(commit_info) ~= 'string' or git.is_git_error_message(commit_info) then
     commit_info = ''
   end
 
@@ -51,9 +51,5 @@ function M.setup(opts)
     vim.api.nvim_create_autocmd(event, cmd_opts)
   end
 end
-
-M.setup {
-  autocmd_events = { 'CursorMoved' },
-}
 
 return M
