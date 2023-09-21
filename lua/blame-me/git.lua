@@ -1,5 +1,15 @@
 local M = {}
 
+---@param message string
+---@return boolean
+function M.is_git_error_message(message)
+  if message == 'fatal: not a git repository (or any of the parent directories): .git' then
+    return true
+  end
+
+  return false
+end
+
 ---@param line string
 ---@return string
 function M.parse_commit_hash(line)
