@@ -24,16 +24,31 @@ end
 
 function M.set_mark(ns_id, text, row, col)
   local opts = {
-    end_line = 20,
     id = 1,
     virt_text = { {
-      text or '',
+      text,
       '',
     } },
     virt_text_pos = 'eol',
   }
 
-  return vim.api.nvim_buf_set_extmark(0, ns_id, row, col, opts)
+  return vim.api.nvim_buf_set_extmark(0, ns_id, math.max(row, 0), math.max(col, 0), opts)
+end
+
+function M.delete_mark(ns_id)
+  mark_line_number = nil
+  return vim.api.nvim_buf_del_extmark(0, ns_id, 1)
+end
+
+---@return boolean
+function M.is_explorer()
+  local current_type = vim.api.nvim_buf_get_option(0, 'filetype')
+
+  if current_type == 'netrw' then
+    return true
+  end
+
+  return false
 end
 
 return M
