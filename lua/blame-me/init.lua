@@ -52,7 +52,7 @@ local function update_current_annotation(commit_info, line_number)
     return false
   end
 
-  editor.set_mark(ns_id, commit_info, line_number - 1, 0)
+  editor.set_commit_info_mark(ns_id, commit_info, line_number - 1, 0)
 
   mark_is_shown = true
   mark_line_number = line_number

@@ -22,7 +22,7 @@ function M.get_line_number()
   return line_number
 end
 
-function M.set_mark(ns_id, text, row, col)
+function M.set_commit_info_mark(ns_id, text, row, col)
   local opts = {
     id = 1,
     virt_text = { {
