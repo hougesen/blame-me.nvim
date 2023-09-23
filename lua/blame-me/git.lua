@@ -1,3 +1,5 @@
+local editor = require 'blame-me.editor'
+
 local M = {}
 
 ---@param message string
@@ -14,12 +16,16 @@ function M.parse_commit_hash(line)
   return hash
 end
 
+function M.is_modified_line(commit_hash)
+  return commit_hash == '00000000'
+end
+
 ---@comment get commit from cache if possible, otherwise get using git show
 ---@param commit_hash string
 ---@param commits table
 ---@return string|nil
 function M.get_commit_information(commit_hash, commits)
-  if commit_hash == '00000000' then
+  if M.is_modified_line(commit_hash) then
     --default message for uncomitted messages
     return '    * You | Uncommited change'
   end
@@ -60,7 +66,7 @@ end
 
 ---@param path string
 ---@return table|nil
-function M.get_git_blame(path)
+function M.get_git_blame(path, ns_id)
   if path == nil or string.len(path) == 0 then
     return nil
   end
@@ -95,6 +101,12 @@ function M.get_git_blame(path)
       local commit_hash = M.parse_commit_hash(line)
 
       line_commit_map[i] = commit_hash
+
+      if M.is_modified_line(commit_hash) then
+        editor.set_modified_sign(ns_id, i)
+      else
+        editor.remove_modified_sign(ns_id, i)
+      end
     end
 
     i = i + 1

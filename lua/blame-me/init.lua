@@ -22,7 +22,7 @@ local function refresh_current_buffer(current_file)
     return
   end
 
-  files[current_file] = git.get_git_blame(current_file)
+  files[current_file] = git.get_git_blame(current_file, ns_id)
 end
 
 ---@param current_file string
