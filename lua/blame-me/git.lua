@@ -2,12 +2,14 @@ local editor = require 'blame-me.editor'
 
 local M = {}
 
+---check if message is created by this plugin
 ---@param message string
 ---@return boolean
 function M.is_git_error_message(message)
   return message:sub(5, 6) == '*'
 end
 
+---parse commit hash from line
 ---@param line string
 ---@return string
 function M.parse_commit_hash(line)
@@ -16,13 +18,16 @@ function M.parse_commit_hash(line)
   return hash
 end
 
+---check if commit hash is from an actual commit
+---@param commit_hash string
+---@return boolean
 function M.is_modified_line(commit_hash)
   return commit_hash == '00000000'
 end
 
----@comment get commit from cache if possible, otherwise get using git show
+---get commit from cache if possible, otherwise get using git show
 ---@param commit_hash string
----@param commits table
+---@param commits table<string, string>
 ---@return string|nil
 function M.get_commit_information(commit_hash, commits)
   if M.is_modified_line(commit_hash) then
@@ -64,8 +69,10 @@ function M.get_commit_information(commit_hash, commits)
   return commit_info
 end
 
+---get git blame of file
 ---@param path string
----@return table|nil
+---@param ns_id integer
+---@return table<string, string>|nil
 function M.get_git_blame(path, ns_id)
   if path == nil or string.len(path) == 0 then
     return nil
@@ -88,6 +95,8 @@ function M.get_git_blame(path, ns_id)
   end
 
   local i = 1
+
+  ---@type table<string, string>
   local line_commit_map = {}
 
   for line in handle:lines() do

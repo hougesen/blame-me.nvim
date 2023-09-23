@@ -1,19 +1,25 @@
 local editor = require 'blame-me.editor'
 local git = require 'blame-me.git'
 
+---@type integer
 local ns_id = vim.api.nvim_create_namespace 'blame-me'
 
 local M = {}
 
+---@type table<string, table<string, string>
 local files = {}
+
+---@type table<string, string>
 local commits = {}
 
+---@type integer|nil
 local mark_line_number = nil
 
 local mark_is_shown = false
 
+---refresh git blame of file
 ---@param current_file string
-local function refresh_current_buffer(current_file)
+local function refresh_file_git_blame(current_file)
   if editor.is_explorer() then
     return
   end
@@ -25,6 +31,7 @@ local function refresh_current_buffer(current_file)
   files[current_file] = git.get_git_blame(current_file, ns_id)
 end
 
+---get commit info of line
 ---@param current_file string
 ---@param line_number integer
 ---@return string|nil
@@ -40,6 +47,7 @@ local function get_line_info(current_file, line_number)
   return git.get_commit_information(line_commit_hash, commits)
 end
 
+---update commit_info mark
 ---@param commit_info string
 ---@param line_number number
 ---@return boolean
@@ -60,14 +68,16 @@ local function update_current_annotation(commit_info, line_number)
   return true
 end
 
+---deletes old commit info marks
 local function on_cursor_move()
   if mark_is_shown and editor.get_line_number() ~= mark_line_number then
-    editor.delete_mark(ns_id)
+    editor.delete_commit_info_mark(ns_id)
 
     mark_is_shown = false
   end
 end
 
+---refreshes commit info of line
 local function on_cursor_hold()
   local current_file = editor.get_current_file_path()
 
@@ -84,7 +94,7 @@ local function on_cursor_hold()
   local commit_info = get_line_info(current_file, line_number)
 
   if commit_info == nil or update_current_annotation(commit_info, line_number) == false then
-    refresh_current_buffer(current_file)
+    refresh_file_git_blame(current_file)
 
     local updated_commit_info = get_line_info(current_file, line_number)
 
@@ -94,6 +104,7 @@ local function on_cursor_hold()
   end
 end
 
+---refreshes file git blame
 local function on_buff_change()
   local current_file = editor.get_current_file_path()
 
@@ -101,7 +112,7 @@ local function on_buff_change()
     return
   end
 
-  refresh_current_buffer(current_file)
+  refresh_file_git_blame(current_file)
 end
 
 function M.setup()
