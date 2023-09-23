@@ -35,6 +35,20 @@ function M.set_mark(ns_id, text, row, col)
   return vim.api.nvim_buf_set_extmark(0, ns_id, math.max(row, 0), math.max(col, 0), opts)
 end
 
+function M.set_modified_sign(ns_id, row)
+  local opts = {
+    id = 1 + row,
+    sign_text = 'M',
+    sign_hl_group = 'DiffText',
+  }
+
+  return vim.api.nvim_buf_set_extmark(0, ns_id, math.max(row - 1, 0), 0, opts)
+end
+
+function M.remove_modified_sign(ns_id, row)
+  return vim.api.nvim_buf_del_extmark(0, ns_id, 1 + row)
+end
+
 function M.delete_mark(ns_id)
   return vim.api.nvim_buf_del_extmark(0, ns_id, 1)
 end
