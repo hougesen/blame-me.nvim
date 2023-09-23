@@ -14,9 +14,22 @@ function M.parse_commit_hash(line)
   return hash
 end
 
+---@comment get commit from cache if possible, otherwise get using git show
 ---@param commit_hash string
+---@param commits table
 ---@return string|nil
-function M.get_commit_information(commit_hash)
+function M.get_commit_information(commit_hash, commits)
+  if commit_hash == '00000000' then
+    --default message for uncomitted messages
+    return '    * You | Uncommited change'
+  end
+
+  local existing_commit = commits[commit_hash]
+
+  if existing_commit ~= nil then
+    return existing_commit
+  end
+
   local cmd =
     string.format('%s %s', 'git show --quiet   --pretty=format:"    * %an, %ar | %s" 2> /dev/null', commit_hash)
 
@@ -37,6 +50,10 @@ function M.get_commit_information(commit_hash)
   local commit_info = handle:read()
 
   handle:close()
+
+  if commit_info ~= nil and M.is_git_error_message(commit_info) == false then
+    commits[commit_hash] = commit_info
+  end
 
   return commit_info
 end
@@ -64,10 +81,8 @@ function M.get_git_blame(path)
     return nil
   end
 
-  local commits = {}
-
   local i = 1
-  local lines = {}
+  local line_commit_map = {}
 
   for line in handle:lines() do
     if string.len(line) > 0 then
@@ -79,24 +94,7 @@ function M.get_git_blame(path)
 
       local commit_hash = M.parse_commit_hash(line)
 
-      if commit_hash == '00000000' then
-        --default message for uncomitted messages
-        lines[i] = '    * You | Uncommited change'
-      else
-        local existing_commit = commits[commit_hash]
-
-        if existing_commit ~= nil then
-          lines[i] = existing_commit
-        else
-          local commit_message = M.get_commit_information(commit_hash)
-
-          if commit_message ~= nil and M.is_git_error_message(commit_message) == false then
-            commits[commit_hash] = commit_message
-
-            lines[i] = commit_message
-          end
-        end
-      end
+      line_commit_map[i] = commit_hash
     end
 
     i = i + 1
@@ -104,7 +102,7 @@ function M.get_git_blame(path)
 
   handle:close()
 
-  return lines
+  return line_commit_map
 end
 
 return M

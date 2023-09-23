@@ -36,7 +36,6 @@ function M.set_mark(ns_id, text, row, col)
 end
 
 function M.delete_mark(ns_id)
-  mark_line_number = nil
   return vim.api.nvim_buf_del_extmark(0, ns_id, 1)
 end
 
@@ -49,6 +48,12 @@ function M.is_explorer()
   end
 
   return false
+end
+
+---@param path string
+---@return boolean
+function M.is_directory(path)
+  return vim.fn.isdirectory(path) ~= 0
 end
 
 return M

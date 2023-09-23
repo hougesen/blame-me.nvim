@@ -5,7 +5,8 @@ local ns_id = vim.api.nvim_create_namespace 'blame-me'
 
 local M = {}
 
-local state = {}
+local files = {}
+local commits = {}
 
 local mark_line_number = nil
 
@@ -17,26 +18,26 @@ local function refresh_current_buffer(current_file)
     return
   end
 
-  state[current_file] = git.get_git_blame(current_file)
+  if editor.is_directory(current_file) then
+    return
+  end
+
+  files[current_file] = git.get_git_blame(current_file)
 end
 
 ---@param current_file string
 ---@param line_number integer
 ---@return string|nil
-local function get_from_state(current_file, line_number)
-  local file_in_state = state[current_file]
+local function get_line_info(current_file, line_number)
+  local file_in_state = files[current_file]
 
   if file_in_state == nil then
     return nil
   end
 
-  local line_info = file_in_state[line_number]
+  local line_commit_hash = file_in_state[line_number]
 
-  if type(line_info) ~= 'string' then
-    return nil
-  end
-
-  return line_info
+  return git.get_commit_information(line_commit_hash, commits)
 end
 
 ---@param commit_info string
@@ -60,8 +61,6 @@ local function update_current_annotation(commit_info, line_number)
 end
 
 local function on_cursor_move()
-  local cursor = vim.api.nvim_win_get_cursor(0)
-
   if mark_is_shown and editor.get_line_number() ~= mark_line_number then
     editor.delete_mark(ns_id)
 
@@ -82,12 +81,12 @@ local function on_cursor_hold()
 
   local line_number = editor.get_line_number()
 
-  local commit_info = get_from_state(current_file, line_number)
+  local commit_info = get_line_info(current_file, line_number)
 
   if commit_info == nil or update_current_annotation(commit_info, line_number) == false then
     refresh_current_buffer(current_file)
 
-    local updated_commit_info = get_from_state(current_file, line_number)
+    local updated_commit_info = get_line_info(current_file, line_number)
 
     if updated_commit_info ~= nil then
       update_current_annotation(updated_commit_info, line_number)
