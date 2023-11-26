@@ -112,9 +112,15 @@ function M.get_git_blame(path, ns_id)
       line_commit_map[i] = commit_hash
 
       if M.is_modified_line(commit_hash) then
-        editor.set_modified_sign(ns_id, i)
+        -- TODO: handle error cases
+        pcall(function()
+          editor.set_modified_sign(ns_id, i)
+        end)
       else
-        editor.remove_modified_sign(ns_id, i)
+        -- TODO: handle error cases
+        pcall(function()
+          editor.remove_modified_sign(ns_id, i)
+        end)
       end
     end
 
