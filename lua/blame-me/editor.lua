@@ -6,6 +6,10 @@ function M.get_current_file_path()
   return vim.api.nvim_buf_get_name(0)
 end
 
+function M.get_current_mode()
+  return vim.api.nvim_get_mode().mode
+end
+
 ---get current line number of active buffer
 ---@return integer
 function M.get_line_number()

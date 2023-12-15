@@ -2,6 +2,7 @@ local M = {}
 
 M.defaults = {
   delay = 1000,
+  modes = { 'n' },
   show_on = {
     'CursorHold',
     'CursorHoldI',
@@ -17,7 +18,6 @@ M.defaults = {
 }
 
 ---@param options unknown
----@return table
 function M.set(options)
   return vim.tbl_deep_extend('force', {}, M.defaults, options or {})
 end
