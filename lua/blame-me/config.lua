@@ -1,35 +1,25 @@
 local M = {}
 
----@param opts unknown
-function M.set(opts)
-  local config = {
-    show_on = {
-      'CursorHold',
-      'CursorHoldI',
-    },
-    hide_on = {
-      'CursorMoved',
-      'CursorMovedI',
-    },
-    refresh_on = {
-      'BufWritePost',
-      'BufEnter',
-    },
-  }
+M.defaults = {
+  delay = 1000,
+  show_on = {
+    'CursorHold',
+    'CursorHoldI',
+  },
+  hide_on = {
+    'CursorMoved',
+    'CursorMovedI',
+  },
+  refresh_on = {
+    'BufWritePost',
+    'BufEnter',
+  },
+}
 
-  if opts.show_on ~= nil then
-    config.show_on = opts.show_on
-  end
-
-  if opts.hide_on ~= nil then
-    config.hide_on = opts.hide_on
-  end
-
-  if opts.refresh_on ~= nil then
-    config.refresh_on = opts.refresh_on
-  end
-
-  return config
+---@param options unknown
+---@return table
+function M.set(options)
+  return vim.tbl_deep_extend('force', {}, M.defaults, options or {})
 end
 
 return M

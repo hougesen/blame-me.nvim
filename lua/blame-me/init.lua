@@ -3,6 +3,8 @@ local git = require 'blame-me.git'
 
 local M = {}
 
+local uv = vim.uv or vim.loop
+
 ---@type integer
 local ns_id = vim.api.nvim_create_namespace 'blame-me'
 
@@ -47,11 +49,15 @@ local function get_line_info(current_file, line_number)
   return git.get_commit_information(line_commit_hash, commits)
 end
 
+local timer_line = -1
+local timer = uv.new_timer()
+
 ---update commit_info mark
 ---@param commit_info string
 ---@param line_number number
+---@param delay  number
 ---@return boolean
-local function update_current_annotation(commit_info, line_number)
+local function update_current_annotation(commit_info, line_number, delay)
   if type(commit_info) ~= 'string' or git.is_git_error_message(commit_info) then
     return false
   end
@@ -60,10 +66,22 @@ local function update_current_annotation(commit_info, line_number)
     return false
   end
 
-  editor.set_commit_info_mark(ns_id, commit_info, line_number - 1, 0)
+  timer_line = line_number
 
-  mark_is_shown = true
-  mark_line_number = line_number
+  timer:start(
+    delay,
+    1000,
+    vim.schedule_wrap(function()
+      timer:stop()
+
+      if line_number == timer_line then
+        editor.set_commit_info_mark(ns_id, commit_info, line_number - 1, 0)
+
+        mark_is_shown = true
+        mark_line_number = line_number
+      end
+    end)
+  )
 
   return true
 end
@@ -78,7 +96,8 @@ local function delete_existing_mark()
 end
 
 ---refreshes commit info of line
-local function show_current_line()
+---@param delay number
+local function show_current_line(delay)
   local current_file = editor.get_current_file_path()
 
   if current_file == nil then
@@ -93,13 +112,13 @@ local function show_current_line()
 
   local commit_info = get_line_info(current_file, line_number)
 
-  if commit_info == nil or update_current_annotation(commit_info, line_number) == false then
+  if commit_info == nil or update_current_annotation(commit_info, line_number, delay) == false then
     refresh_file_git_blame(current_file)
 
     local updated_commit_info = get_line_info(current_file, line_number)
 
     if updated_commit_info ~= nil then
-      update_current_annotation(updated_commit_info, line_number)
+      update_current_annotation(updated_commit_info, line_number, delay)
     end
   end
 end
@@ -130,7 +149,9 @@ function M.setup(opts)
   end
 
   local show_opts = {
-    callback = show_current_line,
+    callback = function()
+      show_current_line(conf.delay)
+    end,
     group = group,
   }
 

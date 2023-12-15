@@ -21,8 +21,9 @@ local blame_me_plugin = {
 
 ## Available optionsDescription
 
-| Name       | Default                             | Description                                   |
-| ---------- | ----------------------------------- | --------------------------------------------- |
-| show_on    | `{ 'CursorHold', 'CursorHoldI' }`   | List of events to show line information on    |
-| hide_on    | `{ 'CursorMoved', 'CursorMovedI' }` | List of events to hide line information on    |
-| refresh_on | `{ 'BufEnter', 'BufWritePost' }`    | List of events to fresh commit information on |
+| Name       | Default                             | Description                                                   |
+| ---------- | ----------------------------------- | ------------------------------------------------------------- |
+| delay      | 1000                                | Amount of milliseconds to wait before showing line informatin |
+| show_on    | `{ 'CursorHold', 'CursorHoldI' }`   | List of events to show line information on                    |
+| hide_on    | `{ 'CursorMoved', 'CursorMovedI' }` | List of events to hide line information on                    |
+| refresh_on | `{ 'BufEnter', 'BufWritePost' }`    | List of events to fresh commit information on                 |
