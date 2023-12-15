@@ -97,7 +97,8 @@ end
 
 ---refreshes commit info of line
 ---@param delay number
-local function show_current_line(delay)
+---@param mode table
+local function show_current_line(delay, modes)
   local current_file = editor.get_current_file_path()
 
   if current_file == nil then
@@ -105,6 +106,12 @@ local function show_current_line(delay)
   end
 
   if current_file == '' then
+    return
+  end
+
+  local cur_mode = editor.get_current_mode()
+
+  if modes[cur_mode] ~= true then
     return
   end
 
@@ -148,9 +155,15 @@ function M.setup(opts)
     vim.api.nvim_create_autocmd(ev, hide_opts)
   end
 
+  local enabled_modes = {}
+
+  for _, mode in pairs(conf.modes) do
+    enabled_modes[mode] = true
+  end
+
   local show_opts = {
     callback = function()
-      show_current_line(conf.delay)
+      show_current_line(conf.delay, enabled_modes)
     end,
     group = group,
   }

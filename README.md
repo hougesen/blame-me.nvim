@@ -23,6 +23,7 @@ local blame_me_plugin = {
 
 | Name       | Default                             | Description                                                   |
 | ---------- | ----------------------------------- | ------------------------------------------------------------- |
+| modes      | {'n'}                               | Modes plugin is enabled for                                   |
 | delay      | 1000                                | Amount of milliseconds to wait before showing line informatin |
 | show_on    | `{ 'CursorHold', 'CursorHoldI' }`   | List of events to show line information on                    |
 | hide_on    | `{ 'CursorMoved', 'CursorMovedI' }` | List of events to hide line information on                    |
