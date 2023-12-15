@@ -1,12 +1,12 @@
 local editor = require 'blame-me.editor'
 local git = require 'blame-me.git'
 
+local M = {}
+
 ---@type integer
 local ns_id = vim.api.nvim_create_namespace 'blame-me'
 
-local M = {}
-
----@type table<string, table<string, string>
+---@type table<string, table<string, string>>
 local files = {}
 
 ---@type table<string, string>
@@ -69,7 +69,7 @@ local function update_current_annotation(commit_info, line_number)
 end
 
 ---deletes old commit info marks
-local function on_cursor_move()
+local function delete_existing_mark()
   if mark_is_shown and editor.get_line_number() ~= mark_line_number then
     editor.delete_commit_info_mark(ns_id)
 
@@ -78,7 +78,7 @@ local function on_cursor_move()
 end
 
 ---refreshes commit info of line
-local function on_cursor_hold()
+local function show_current_line()
   local current_file = editor.get_current_file_path()
 
   if current_file == nil then
@@ -105,7 +105,7 @@ local function on_cursor_hold()
 end
 
 ---refreshes file git blame
-local function on_buff_change()
+local function update_commits()
   local current_file = editor.get_current_file_path()
 
   if current_file == nil then
@@ -115,31 +115,37 @@ local function on_buff_change()
   refresh_file_git_blame(current_file)
 end
 
-function M.setup()
+function M.setup(opts)
+  local conf = require('blame-me.config').set(opts or {})
+
   local group = vim.api.nvim_create_augroup('blame_me', { clear = true })
 
-  local cursor_move_config = {
-    callback = on_cursor_move,
+  local hide_opts = {
+    callback = delete_existing_mark,
     group = group,
   }
 
-  vim.api.nvim_create_autocmd('CursorMoved', cursor_move_config)
-  vim.api.nvim_create_autocmd('CursorMovedI', cursor_move_config)
+  for _, ev in pairs(conf.hide_on) do
+    vim.api.nvim_create_autocmd(ev, hide_opts)
+  end
 
-  local cursor_hold_config = {
-    callback = on_cursor_hold,
+  local show_opts = {
+    callback = show_current_line,
     group = group,
   }
 
-  vim.api.nvim_create_autocmd('CursorHold', cursor_hold_config)
-  vim.api.nvim_create_autocmd('CursorHoldI', cursor_hold_config)
+  for _, ev in pairs(conf.show_on) do
+    vim.api.nvim_create_autocmd(ev, show_opts)
+  end
 
   local refresh_opts = {
-    callback = on_buff_change,
+    callback = update_commits,
     group = group,
   }
 
-  vim.api.nvim_create_autocmd('BufWritePost', refresh_opts)
+  for _, ev in pairs(conf.refresh_on) do
+    vim.api.nvim_create_autocmd(ev, refresh_opts)
+  end
 end
 
 return M
