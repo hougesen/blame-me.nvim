@@ -55,9 +55,10 @@ local timer = uv.new_timer()
 ---update commit_info mark
 ---@param commit_info string
 ---@param line_number number
----@param delay  number
+---@param delay number
+---@param current_file string
 ---@return boolean
-local function update_current_annotation(commit_info, line_number, delay)
+local function update_current_annotation(commit_info, line_number, delay, current_file)
   if type(commit_info) ~= 'string' or git.is_git_error_message(commit_info) then
     return false
   end
@@ -74,7 +75,7 @@ local function update_current_annotation(commit_info, line_number, delay)
     vim.schedule_wrap(function()
       timer:stop()
 
-      if line_number == timer_line then
+      if line_number == timer_line and current_file == editor.get_current_file_path() then
         editor.set_commit_info_mark(ns_id, commit_info, line_number - 1, 0)
 
         mark_is_shown = true
@@ -97,7 +98,7 @@ end
 
 ---refreshes commit info of line
 ---@param delay number
----@param mode table
+---@param modes table
 local function show_current_line(delay, modes)
   local current_file = editor.get_current_file_path()
 
@@ -119,13 +120,13 @@ local function show_current_line(delay, modes)
 
   local commit_info = get_line_info(current_file, line_number)
 
-  if commit_info == nil or update_current_annotation(commit_info, line_number, delay) == false then
+  if commit_info == nil or update_current_annotation(commit_info, line_number, delay, current_file) == false then
     refresh_file_git_blame(current_file)
 
     local updated_commit_info = get_line_info(current_file, line_number)
 
     if updated_commit_info ~= nil then
-      update_current_annotation(updated_commit_info, line_number, delay)
+      update_current_annotation(updated_commit_info, line_number, delay, current_file)
     end
   end
 end
