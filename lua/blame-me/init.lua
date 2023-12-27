@@ -49,6 +49,15 @@ local function get_line_info(current_file, line_number)
   return git.get_commit_information(line_commit_hash, commits)
 end
 
+---deletes old commit info marks
+local function delete_existing_mark()
+  if mark_is_shown and editor.get_line_number() ~= mark_line_number then
+    editor.delete_commit_info_mark(ns_id)
+
+    mark_is_shown = false
+  end
+end
+
 local timer_line = -1
 local timer = uv.new_timer()
 
@@ -66,6 +75,8 @@ local function update_current_annotation(commit_info, line_number, delay, curren
   if string.match(commit_info, 'fatal: not a git repository (or any of the parent directories): .git') then
     return false
   end
+
+  delete_existing_mark()
 
   timer_line = line_number
 
@@ -85,15 +96,6 @@ local function update_current_annotation(commit_info, line_number, delay, curren
   )
 
   return true
-end
-
----deletes old commit info marks
-local function delete_existing_mark()
-  if mark_is_shown and editor.get_line_number() ~= mark_line_number then
-    editor.delete_commit_info_mark(ns_id)
-
-    mark_is_shown = false
-  end
 end
 
 ---refreshes commit info of line
