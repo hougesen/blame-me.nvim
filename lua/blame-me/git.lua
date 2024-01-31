@@ -31,8 +31,8 @@ end
 ---@return string|nil
 function M.get_commit_information(commit_hash, commits)
   if M.is_modified_line(commit_hash) then
-    --default message for uncomitted messages
-    return '    * You | Uncommited change'
+    --default message for uncommitted messages
+    return '    * You | Uncommitted change'
   end
 
   local existing_commit = commits[commit_hash]
