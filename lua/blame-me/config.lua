@@ -15,6 +15,7 @@ M.defaults = {
     'BufWritePost',
     'BufEnter',
   },
+  signs = true,
 }
 
 ---@param options unknown

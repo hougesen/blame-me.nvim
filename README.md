@@ -6,7 +6,7 @@ A lean git blame plugin for neovim.
 
 ## Usage
 
-blame-me.nvim _should_ work out of the box. Simply install the using your package manager of choice:
+blame-me.nvim _should_ work out of the box. Simply install it using your package manager of choice:
 
 ### Lazy
 
@@ -19,7 +19,7 @@ local blame_me_plugin = {
 }
 ```
 
-## Available optionsDescription
+## Available options
 
 | Name       | Default                             | Description                                                    |
 | ---------- | ----------------------------------- | -------------------------------------------------------------- |
@@ -28,3 +28,4 @@ local blame_me_plugin = {
 | show_on    | `{ 'CursorHold', 'CursorHoldI' }`   | List of events to show line information on                     |
 | hide_on    | `{ 'CursorMoved', 'CursorMovedI' }` | List of events to hide line information on                     |
 | refresh_on | `{ 'BufEnter', 'BufWritePost' }`    | List of events to fresh commit information on                  |
+| signs      | `true`                              | Whether to set `M` sign                                        |
