@@ -30,7 +30,7 @@ local function refresh_file_git_blame(current_file)
     return
   end
 
-  files[current_file] = git.get_git_blame(current_file, ns_id)
+  files[current_file] = git.get_git_blame(current_file, ns_id, M.conf.signs)
 end
 
 ---get commit info of line
@@ -146,6 +146,8 @@ end
 
 function M.setup(opts)
   local conf = require('blame-me.config').set(opts or {})
+
+  M.conf = conf
 
   local group = vim.api.nvim_create_augroup('blame_me', { clear = true })
 

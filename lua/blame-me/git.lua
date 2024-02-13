@@ -72,8 +72,9 @@ end
 ---get git blame of file
 ---@param path string
 ---@param ns_id integer
+---@param set_signs boolean
 ---@return table<string, string>|nil
-function M.get_git_blame(path, ns_id)
+function M.get_git_blame(path, ns_id, set_signs)
   if path == nil or string.len(path) == 0 then
     return nil
   end
@@ -111,16 +112,18 @@ function M.get_git_blame(path, ns_id)
 
       line_commit_map[i] = commit_hash
 
-      if M.is_modified_line(commit_hash) then
-        -- TODO: handle error cases
-        pcall(function()
-          editor.set_modified_sign(ns_id, i)
-        end)
-      else
-        -- TODO: handle error cases
-        pcall(function()
-          editor.remove_modified_sign(ns_id, i)
-        end)
+      if set_signs == true then
+        if M.is_modified_line(commit_hash) then
+          -- TODO: handle error cases
+          pcall(function()
+            editor.set_modified_sign(ns_id, i)
+          end)
+        else
+          -- TODO: handle error cases
+          pcall(function()
+            editor.remove_modified_sign(ns_id, i)
+          end)
+        end
       end
     end
 
